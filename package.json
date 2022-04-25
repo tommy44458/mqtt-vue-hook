@@ -1,0 +1,12 @@
+{
+  "name": "mqtt-vue3-hook",
+  "version": "1.0.0",
+  "description": "Connect to mqtt broker, implementation for Vuejs 3 and support Vite.",
+  "main": "main.ts",
+  "repository": "https://github.com/tommy44458/mqtt-vue3-hook.git",
+  "author": "Tommy Xin <free44458@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "mqtt": "^4.3.7"
+  }
+}
