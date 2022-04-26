@@ -48,7 +48,6 @@ const onConnectFail = () => {
     client?.on('error', error => {
         console.log('connect fail', error)
         client?.end()
-        client = null
     })
 }
 
@@ -75,7 +74,7 @@ const onReconnect = () => {
 export const connect = (_options: mqtt.IClientOptions) => {
     client = mqtt.connect(`${_options.protocol}://${_options.host}:${_options.port}`, _options)
     client.on('connect', e => {
-        console.log('success connect to host:', e)
+        console.log('success connect to host:', e, _options)
     })
     onMessage()
     onReconnect()
