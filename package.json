@@ -5,14 +5,7 @@
   "files": [
     "dist"
   ],
-  "main": "./dist/mqtt-vue3-hook.umd.js",
-  "module": "./dist/mqtt-vue3-hook.es.js",
-  "exports": {
-    ".": {
-      "import": "./dist/mqtt-vue3-hook.es.js",
-      "require": "./dist/mqtt-vue3-hook.umd.js"
-    }
-  },
+  "main": "src/main.ts",
   "repository": "https://github.com/tommy44458/mqtt-vue3-hook.git",
   "author": "Tommy Xin <free44458@gmail.com>",
   "license": "MIT",
