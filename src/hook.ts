@@ -1,7 +1,6 @@
 import mqtt from 'mqtt'
 
 export interface MqttHook {
-    getClient: () => mqtt.Client | null,
     disconnect: () => void,
     reconnect: (options: mqtt.IClientOptions) => void,
     subscribe: (topicArray: string[], qos?: mqtt.QoS) => void,
@@ -142,10 +141,7 @@ const clearEvent = () => {
     messageListeners.clear()
 }
 
-const getClient = (): mqtt.Client | null => client
-
 export const mqttHook = (): MqttHook => ({
-    getClient,
     disconnect,
     reconnect,
     subscribe,
