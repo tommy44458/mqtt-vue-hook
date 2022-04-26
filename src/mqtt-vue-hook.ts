@@ -4,13 +4,14 @@ import { connect, mqttHook, MqttHook } from './hook'
 
 export default {
     install: async (_app: App, options: mqtt.IClientOptions) => {
-        _app.mixin({
-            async mounted() {
-                await connect(options)
-            },
-        })
-        _app.config.globalProperties.$useMQTT = () => mqttHook()
+        await connect(options)
+        // _app.mixin({
+        //     async mounted() {
+        //         await connect(options)
+        //     },
+        // })
+        // _app.config.globalProperties.$useMQTT = () => mqttHook()
     },
 }
 export type { MqttHook }
-// export const useMQTT = () => mqttHook()
+export const useMQTT = () => mqttHook()

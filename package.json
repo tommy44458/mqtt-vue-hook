@@ -1,6 +1,6 @@
 {
   "name": "mqtt-vue-hook",
-  "version": "1.0.14",
+  "version": "1.0.16",
   "type": "module",
   "description": "Connect to mqtt broker, implementation for Vuejs 3 and support Vite.",
   "files": [
