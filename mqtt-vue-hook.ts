@@ -4,7 +4,7 @@
  * See LICENSE for more information
  */
 
-import { mqttVueHook, useMQTT } from './src/main'
+import { mqttVueHook, useMQTT, MqttHook } from './src/main'
 
 module.exports.mqttVueHook = mqttVueHook
 module.exports.useMQTT = useMQTT
