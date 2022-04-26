@@ -4,7 +4,11 @@ import { connect, mqttHook, MqttHook } from './hook'
 
 export default {
     install: (_app: App, options: mqtt.IClientOptions) => {
-        connect(options)
+        _app.mixin({
+            beforeCreate() {
+                connect(options)
+            }
+        })
     },
     useMQTT: () => mqttHook()
 }
