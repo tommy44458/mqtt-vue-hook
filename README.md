@@ -1,16 +1,92 @@
-# Vue 3 + TypeScript + Vite
+# Mqtt-Vue-Hook
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+Connect to mqtt broker, support Vue3, Vite.
 
-## Recommended IDE Setup
+## Install
 
-- [VS Code](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=johnsoncodehk.volar)
+#### Npm
+``` bash
+npm install mqtt-vue-hook --save
+```
+#### Yarn
+``` bash
+yarn add mqtt-vue-hook -D
+```
 
-## Type Support For `.vue` Imports in TS
+## Usage
+#### main.ts (Vue3)
+``` ts
+import { createApp } from 'vue'
+import App from './App.vue'
 
-Since TypeScript cannot handle type information for `.vue` imports, they are shimmed to be a generic Vue component type by default. In most cases this is fine if you don't really care about component prop types outside of templates. However, if you wish to get actual prop types in `.vue` imports (for example to get props validation when using manual `h(...)` calls), you can enable Volar's Take Over mode by following these steps:
+const app = createApp(App)
 
-1. Run `Extensions: Show Built-in Extensions` from VS Code's command palette, look for `TypeScript and JavaScript Language Features`, then right click and select `Disable (Workspace)`. By default, Take Over mode will enable itself if the default TypeScript extension is disabled.
-2. Reload the VS Code window by running `Developer: Reload Window` from the command palette.
+import mqttVueHook from 'mqtt-vue-hook'
+// app.use(mqttVueHook, options)
+app.use(mqttVueHook, {
+    protocol: 'ws',
+    host: mqttHost,
+    port: mqttPort,
+    clean: false,
+    keepalive: 60,
+    clientId: `mqtt_client_${Math.random().toString(16).substring(2, 10)}`,
+    connectTimeout: 4000,
+})
+```
+options: https://github.com/mqttjs/MQTT.js#client
 
-You can learn more about Take Over mode [here](https://github.com/johnsoncodehk/volar/discussions/471).
+#### Subscribe
+``` vue
+<script setup lang="ts">
+import { useMQTT } from 'mqtt-vue-hook'
+
+onMounted(() => {
+	const mqttHook = useMQTT()
+        // mqttHook.subscribe([...topic], qos)
+        // mqttHook.unSubscribe(topic)
+        // '+' == /.+/
+        // '#' == /[A-Za-z0-9/]/
+	mqttHook.subscribe(['+/root/#'], 1)
+})
+</script>
+```
+options: https://github.com/mqttjs/MQTT.js#subscribe
+
+#### Publish
+``` vue
+<script setup lang="ts">
+import { useMQTT } from 'mqtt-vue-hook'
+
+onMounted(() => {
+	const mqttHook = useMQTT()
+        // mqttHook.publish(topic, message, qos)
+	mqttHook.publish(['test/root/1'], 'my message', 1)
+})
+</script>
+```
+options: https://github.com/mqttjs/MQTT.js#publish
+
+#### Register Event
+``` vue
+<script setup lang="ts">
+import { useMQTT } from 'mqtt-vue-hook'
+
+onMounted(() => {
+	const mqttHook = useMQTT()
+
+        // mqttHook.registerEvent(topic, callback function, vm = current instance or string)
+        // mqttHook.unRegisterEvent(topic, vm)
+	mqttHook.registerEvent(
+		'+/root/#',
+		(topic: string, message: string) => {
+			Notification({
+				title: topic,
+				message: message.toString(),
+				type: 'info',
+			})
+		},
+    this,
+	)
+})
+</script>
+```
