@@ -9,7 +9,7 @@
     "*.js",
     "*.ts"
   ],
-  "main": "index.ts",
+  "main": "mqtt-vue-hook.ts",
   "repository": "https://github.com/tommy44458/mqtt-vue-hook.git",
   "author": "Tommy Xin <free44458@gmail.com>",
   "license": "MIT",

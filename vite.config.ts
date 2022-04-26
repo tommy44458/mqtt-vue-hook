@@ -7,17 +7,16 @@ export default defineConfig({
     resolve: {
         alias: {
             mqtt: 'mqtt/dist/mqtt.js',
-            '@': resolve(__dirname, resolve('src')),
         },
     },
     build: {
         lib: {
-            entry: resolve(__dirname, 'index.ts'),
+            entry: resolve(__dirname, 'mqtt-vue-hook.ts'),
             name: 'mqtt-vue-hook',
-            fileName: (format) => `mqtt-vue-hook.${format}.js`,
+            fileName: 'mqtt-vue-hook.ts',
         },
         rollupOptions: {
-            external: ['vue', 'mqtt'],
+            external: ['vue'],
         },
     },
 })

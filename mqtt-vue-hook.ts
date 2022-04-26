@@ -4,8 +4,7 @@
  * See LICENSE for more information
  */
 
-const { mqttvueHook, useMQTT, MqttHook } = require('./src/main.ts')
+import { mqttvueHook, useMQTT } from './src/main'
 
 module.exports.mqttvueHook = mqttvueHook
 module.exports.useMQTT = useMQTT
-module.exports.MqttHook = MqttHook
