@@ -19,6 +19,8 @@ interface Listener {
 
 let client: mqtt.MqttClient | null = null
 
+export let options: mqtt.IClientOptions = {}
+
 const messageListeners = new Map()
 
 const eq = (str1: string, str2: string) => {
@@ -48,6 +50,7 @@ const onConnectFail = () => {
     client?.on('error', error => {
         console.log('connect fail', error)
         client?.end()
+        client = null
     })
 }
 
@@ -68,6 +71,7 @@ const onMessage = () => {
 const onReconnect = () => {
     client?.on('reconnect', (error: string) => {
         console.log('try to reconnect:', error)
+        client?.reconnect(options)
     })
 }
 
@@ -82,9 +86,11 @@ export const connect = (_options: mqtt.IClientOptions) => {
 }
 
 const disconnect = () => {
-    client?.end()
-    client = null
-    console.log('mqtt disconnected')
+    if (client) {
+        client.end()
+        client = null
+        console.log('mqtt disconnected')
+    }
 }
 
 const reconnect = (_options: mqtt.IClientOptions) => {
@@ -139,14 +145,21 @@ const clearEvent = () => {
     messageListeners.clear()
 }
 
-export const mqttHook = (): MqttHook => ({
-    client,
-    disconnect,
-    reconnect,
-    subscribe,
-    unSubscribe,
-    publish,
-    registerEvent,
-    unRegisterEvent,
-    clearEvent,
-})
+export const mqttHook = (): MqttHook => {
+
+    if (client == null) {
+        connect(options)
+    }
+
+    return {
+        client,
+        disconnect,
+        reconnect,
+        subscribe,
+        unSubscribe,
+        publish,
+        registerEvent,
+        unRegisterEvent,
+        clearEvent,
+    }
+}
