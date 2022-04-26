@@ -17,7 +17,7 @@ interface Listener {
     vm: any
 }
 
-let client: mqtt.MqttClient | null = null
+export let client: mqtt.MqttClient | null = null
 
 const messageListeners = new Map()
 
@@ -71,10 +71,11 @@ const onReconnect = () => {
     })
 }
 
-export const connect = (_options: mqtt.IClientOptions) => {
+export const connect = async (_options: mqtt.IClientOptions) => {
     client = mqtt.connect(`${_options.protocol}://${_options.host}:${_options.port}`, _options)
     client.on('connect', e => {
-        console.log('success connect to host:', e, _options)
+        console.log('option', _options)
+        console.log('success connect to host:', e)
     })
     onMessage()
     onReconnect()
