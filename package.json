@@ -1,16 +1,16 @@
 {
   "name": "mqtt-vue-hook",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "type": "module",
   "description": "Connect to mqtt broker, implementation for Vuejs 3 and support Vite.",
   "files": [
     "dist/*"
   ],
-  "main": "dist/mqtt-vue-hook.es.js",
+  "main": "dist/mqtt-vue-hook.umd.js",
   "module": "dist/mqtt-vue-hook.es.js",
   "exports": {
     ".": {
-      "require": "./dist/mqtt-vue-hook.es.js",
+      "require": "./dist/mqtt-vue-hook.umd.js",
       "import": "./dist/mqtt-vue-hook.es.js"
     }
   },
@@ -23,7 +23,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@rollup/pluginutils": "^4.2.1",
     "mqtt": "^4.3.7",
+    "rollup": "^2.70.2",
     "vite-plugin-dts": "^1.1.1",
     "vue": "^3.2.25"
   },

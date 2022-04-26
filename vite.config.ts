@@ -1,12 +1,16 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { resolve } from 'path'
-import dts from 'vite-plugin-dts'
+import dts from './plugins/dts'
 
 export default defineConfig({
-    plugins: [vue(), dts()],
+    plugins: [
+        vue(),
+        dts(),
+    ],
     resolve: {
         alias: {
+            '@': resolve(__dirname, resolve('src')),
             mqtt: 'mqtt/dist/mqtt.js',
         },
     },
@@ -14,7 +18,7 @@ export default defineConfig({
         lib: {
             entry: resolve(__dirname, 'mqtt-vue-hook.ts'),
             name: 'mqtt-vue-hook',
-            formats: ['es'],
+            // formats: ['es'],
             fileName: 'mqtt-vue-hook',
         },
         rollupOptions: {
