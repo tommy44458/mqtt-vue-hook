@@ -19,8 +19,6 @@ interface Listener {
 
 let client: mqtt.MqttClient | null = null
 
-export let options: mqtt.IClientOptions = {}
-
 const messageListeners = new Map()
 
 const eq = (str1: string, str2: string) => {
@@ -71,7 +69,6 @@ const onMessage = () => {
 const onReconnect = () => {
     client?.on('reconnect', (error: string) => {
         console.log('try to reconnect:', error)
-        client?.reconnect(options)
     })
 }
 
@@ -146,11 +143,6 @@ const clearEvent = () => {
 }
 
 export const mqttHook = (): MqttHook => {
-
-    if (client == null) {
-        connect(options)
-    }
-
     return {
         client,
         disconnect,
