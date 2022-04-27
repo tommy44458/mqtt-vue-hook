@@ -6,14 +6,14 @@ export interface MqttHook {
     subscribe: (topicArray: string[], qos?: mqtt.QoS) => void,
     unSubscribe: (unTopic: string) => void,
     publish: (topic: string, message: string, qos?: mqtt.QoS) => void,
-    registerEvent: (topic: string, callback: (topic: string, message: string) => void, vm?: any) => void,
+    registerEvent: (topic: string, callback: (topic: string, message: string) => void, vm?: string) => void,
     unRegisterEvent: (topic: string, vm?: any) => void,
     clearEvent: () => void,
 }
 
 interface Listener {
     callback: (topic: string, message: string) => void
-    vm: any
+    vm: string
 }
 
 let client: mqtt.MqttClient | null = null
@@ -112,23 +112,27 @@ const publish = (topic: string, message: string, qos: mqtt.QoS = 0) => {
     }
 }
 
-const registerEvent = (topic: string, callback: (topic: string, message: string) => void, vm: any | null = null) => {
+const registerEvent = (topic: string, callback: (topic: string, message: string) => void, vm = 'none') => {
     if (typeof callback === 'function') {
         messageListeners.has(topic) || messageListeners.set(topic, [])
         messageListeners.get(topic).push({ callback, vm })
     }
 }
 
-const unRegisterEvent = (topic: string, vm: any | null = null) => {
+const unRegisterEvent = (topic: string, vm = 'none') => {
     const listeners = messageListeners.get(topic)
     let index = -1
 
     if (listeners && listeners.length) {
-        listeners.forEach((element: Listener, i: number) => {
-            if (typeof element.callback === 'function' && element.vm === vm) {
+        for (let i = 0; i < listeners.length; i += 1) {
+            const listener: Listener = listeners[i]
+            if (listener.vm === vm) {
                 index = i
+                console.log('remove event', listener)
+                break
             }
-        })
+        }
+
         if (index > -1) {
             listeners.splice(index, 1)
             messageListeners.set(topic, listeners)
