@@ -14,8 +14,9 @@ yarn add mqtt-vue-hook -D
 ```
 
 ## Usage
-#### main.ts (Vue3)
+####  Vue instance
 ``` ts
+// src/main.ts
 import { createApp } from 'vue'
 import App from './App.vue'
 
@@ -85,8 +86,20 @@ onMounted(() => {
 				type: 'info',
 			})
 		},
-    this,
+    		this,
 	)
 })
 </script>
+```
+
+####  Typescript
+``` ts
+import { useMQTT } from 'mqtt-vue-hook'
+const mqttHook = useMQTT()
+
+mqttHook.registerEvent('#/root/1', (topic: string, message: string) => {
+    console.log(topic, message.toString())
+})
+mqttHook.publish(['test/root/1'], 'my message', 1)
+// console log "test/root/1 my message"
 ```
