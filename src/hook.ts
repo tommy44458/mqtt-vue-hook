@@ -53,6 +53,7 @@ const onConnectFail = () => {
 const onMessage = () => {
     client?.on('message', (topic: string, message: string) => {
         if (message) {
+            console.log('messageListeners', messageListeners)
             messageListeners.forEach((listeners, key) => {
                 if (eq(topic, key) && listeners && listeners.length) {
                     listeners.forEach((listener: Listener) => {
@@ -116,14 +117,17 @@ const registerEvent = (topic: string, callback: (topic: string, message: string)
     if (typeof callback === 'function') {
         messageListeners.has(topic) || messageListeners.set(topic, [])
         messageListeners.get(topic).push({ callback, vm })
+        console.log('registerEvent', callback, vm)
     }
 }
 
 const unRegisterEvent = (topic: string, vm = 'none') => {
+    console.log('messageListeners', messageListeners)
     const listeners = messageListeners.get(topic)
     let index = -1
 
     if (listeners && listeners.length) {
+        console.log('listeners.length', listeners.length)
         for (let i = 0; i < listeners.length; i += 1) {
             const listener: Listener = listeners[i]
             if (listener.vm === vm) {
@@ -134,6 +138,7 @@ const unRegisterEvent = (topic: string, vm = 'none') => {
         }
 
         if (index > -1) {
+            console.log('index', index)
             listeners.splice(index, 1)
             messageListeners.set(topic, listeners)
         }
