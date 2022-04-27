@@ -16,7 +16,7 @@ interface Listener {
     vm: any
 }
 
-export let client: mqtt.MqttClient | null = null
+let client: mqtt.MqttClient | null = null
 
 const messageListeners = new Map()
 
@@ -124,12 +124,11 @@ const unRegisterEvent = (topic: string, vm: any | null = null) => {
     let index = -1
 
     if (listeners && listeners.length) {
-        listeners.forEach((i: number, element: Listener) => {
+        listeners.forEach((element: Listener, i: number) => {
             if (typeof element.callback === 'function' && element.vm === vm) {
                 index = i
             }
         })
-
         if (index > -1) {
             listeners.splice(index, 1)
             messageListeners.set(topic, listeners)
