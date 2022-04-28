@@ -72,10 +72,10 @@ options: https://github.com/mqttjs/MQTT.js#publish
 <script setup lang="ts">
 import { useMQTT } from 'mqtt-vue-hook'
 
-onMounted(() => {
-	const mqttHook = useMQTT()
+const mqttHook = useMQTT()
 
-        // mqttHook.registerEvent(topic, callback function, vm = current instance or string)
+onMounted(() => {
+        // mqttHook.registerEvent(topic, callback function, vm = string)
         // mqttHook.unRegisterEvent(topic, vm)
 	mqttHook.registerEvent(
 		'+/root/#',
@@ -86,8 +86,13 @@ onMounted(() => {
 				type: 'info',
 			})
 		},
-    		this,
+    		'string_key',
 	)
+})
+
+onUnmounted(() => {
+	// mqttHook.unRegisterEvent(topic, vm)
+	mqttHook.unRegisterEvent('+/root/#', 'string_key')
 })
 </script>
 ```
@@ -101,5 +106,6 @@ mqttHook.registerEvent('#/root/1', (topic: string, message: string) => {
     console.log(topic, message.toString())
 })
 mqttHook.publish(['test/root/1'], 'my message', 1)
+
 // console log "test/root/1 my message"
 ```
