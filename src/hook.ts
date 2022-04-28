@@ -73,9 +73,8 @@ const onReconnect = () => {
 
 export const connect = async (_options: mqtt.IClientOptions) => {
     client = mqtt.connect(`${_options.protocol}://${_options.host}:${_options.port}`, _options)
-    client.on('connect', e => {
-        console.log('option', _options)
-        console.log('success connect to host:', e)
+    client.on('connect', () => {
+        console.log(`success connect to host:${_options.host}`)
     })
     onMessage()
     onReconnect()
@@ -123,11 +122,9 @@ const registerEvent = (topic: string, callback: (topic: string, message: string)
 
 const unRegisterEvent = (topic: string, vm = 'none') => {
     const listeners = messageListeners.get(topic)
-    console.error('unRegisterEvent', listeners)
     let indexArray: number[] = []
 
     if (listeners && listeners.length) {
-        console.error('listeners.length', listeners.length)
         for (let i = listeners.length - 1; i >= 0; i -= 1) {
             const listener: Listener = listeners[i]
             if (listener.vm === vm) {
