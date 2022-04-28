@@ -122,24 +122,23 @@ const registerEvent = (topic: string, callback: (topic: string, message: string)
 }
 
 const unRegisterEvent = (topic: string, vm = 'none') => {
-    console.log('messageListeners', messageListeners)
     const listeners = messageListeners.get(topic)
-    let index = -1
+    console.error('unRegisterEvent', listeners)
+    let indexArray: number[] = []
 
     if (listeners && listeners.length) {
-        console.log('listeners.length', listeners.length)
-        for (let i = 0; i < listeners.length; i += 1) {
+        console.error('listeners.length', listeners.length)
+        for (let i = listeners.length - 1; i >= 0; i -= 1) {
             const listener: Listener = listeners[i]
             if (listener.vm === vm) {
-                index = i
-                console.log('remove event', listener)
-                break
+                indexArray.push(i)
             }
         }
 
-        if (index > -1) {
-            console.log('index', index)
-            listeners.splice(index, 1)
+        if (indexArray.length > 0) {
+            indexArray.forEach(index => {
+                listeners.splice(index, 1)
+            })
             messageListeners.set(topic, listeners)
         }
     }

@@ -18,7 +18,7 @@ export default defineConfig({
         lib: {
             entry: resolve(__dirname, 'src/mqtt-vue-hook.ts'),
             name: 'mqtt-vue-hook',
-            // formats: ['es'],
+            formats: ['es'],
             fileName: 'mqtt-vue-hook',
         },
         rollupOptions: {
