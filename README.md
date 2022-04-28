@@ -102,7 +102,7 @@ onUnmounted(() => {
 import { useMQTT } from 'mqtt-vue-hook'
 const mqttHook = useMQTT()
 
-mqttHook.registerEvent('#/root/1', (topic: string, message: string) => {
+mqttHook.registerEvent('+/root/1', (topic: string, message: string) => {
     console.log(topic, message.toString())
 })
 mqttHook.publish(['test/root/1'], 'my message', 1)
