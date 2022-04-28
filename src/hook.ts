@@ -122,11 +122,8 @@ const registerEvent = (topic: string, callback: (topic: string, message: string)
 const unRegisterEvent = (topic: string, vm = 'none') => {
     const listeners: Listener[] = messageListeners.get(topic)
     let indexArray: number[] = []
-    console.error('messageListeners', messageListeners)
-    console.error('listeners', listeners)
 
     if (listeners && listeners.length) {
-        console.error('listeners.length', listeners.length)
         for (let i = listeners.length - 1; i >= 0; i -= 1) {
             const listener: Listener = listeners[i]
             if (listener.vm === vm) {
@@ -134,14 +131,10 @@ const unRegisterEvent = (topic: string, vm = 'none') => {
             }
         }
 
-        console.error('indexArray', indexArray)
-
         if (indexArray.length > 0) {
             indexArray.forEach(index => {
                 listeners.splice(index, 1)
             })
-
-            console.error('listeners', listeners)
 
             if (listeners.length > 0) {
                 messageListeners.set(topic, listeners)
@@ -150,7 +143,6 @@ const unRegisterEvent = (topic: string, vm = 'none') => {
             }
         }
     }
-    console.error('messageListeners', messageListeners)
 }
 
 const clearEvent = () => {
