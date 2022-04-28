@@ -53,7 +53,6 @@ const onConnectFail = () => {
 const onMessage = () => {
     client?.on('message', (topic: string, message: string) => {
         if (message) {
-            console.log('messageListeners', messageListeners)
             messageListeners.forEach((listeners, key) => {
                 if (eq(topic, key) && listeners && listeners.length) {
                     listeners.forEach((listener: Listener) => {
@@ -66,8 +65,8 @@ const onMessage = () => {
 }
 
 const onReconnect = () => {
-    client?.on('reconnect', (error: string) => {
-        console.log('try to reconnect:', error)
+    client?.on('reconnect', () => {
+        console.log('try to reconnect:', client?.options)
     })
 }
 
@@ -99,8 +98,8 @@ const subscribe = (topicArray: string[], qos: mqtt.QoS = 1) => {
 }
 
 const unSubscribe = (unTopic: string) => {
-    client?.unsubscribe(unTopic, (error: string) => {
-        console.log(`unsubscribe: ${unTopic}`, error)
+    client?.unsubscribe(unTopic, () => {
+        console.log(`unsubscribe: ${unTopic}`)
     })
 }
 
@@ -116,12 +115,12 @@ const registerEvent = (topic: string, callback: (topic: string, message: string)
     if (typeof callback === 'function') {
         messageListeners.has(topic) || messageListeners.set(topic, [])
         messageListeners.get(topic).push({ callback, vm })
-        console.log('registerEvent', callback, vm)
+        // console.log('registerEvent', callback, vm)
     }
 }
 
 const unRegisterEvent = (topic: string, vm = 'none') => {
-    const listeners = messageListeners.get(topic)
+    const listeners: Listener[] = messageListeners.get(topic)
     let indexArray: number[] = []
 
     if (listeners && listeners.length) {
@@ -136,7 +135,12 @@ const unRegisterEvent = (topic: string, vm = 'none') => {
             indexArray.forEach(index => {
                 listeners.splice(index, 1)
             })
-            messageListeners.set(topic, listeners)
+
+            if (listeners.length > 0) {
+                messageListeners.set(topic, listeners)
+            } else {
+                messageListeners.delete(topic)
+            }
         }
     }
 }
