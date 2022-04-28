@@ -6,6 +6,6 @@ export default {
     install: async (_app: App, options: mqtt.IClientOptions) => {
         await connect(options)
     },
-    useMQTT: () => mqttHook()
 }
 export type { MqttHook }
+export const useMQTT = () => mqttHook()
