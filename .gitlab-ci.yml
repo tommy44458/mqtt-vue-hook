@@ -1,0 +1,11 @@
+image: node:lts
+
+stage: publish
+script:
+    - yarn install
+    - yarn build
+artifacts:
+    paths:
+        - dist
+only:
+    - main
