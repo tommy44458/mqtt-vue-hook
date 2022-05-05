@@ -27,7 +27,7 @@ export default (): Plugin => {
     return {
         name: 'gen-dts',
         apply: 'build',
-        enforce: 'pre', // 需要在 pre 才能正确拿到 ts 的 script 部分
+        enforce: 'pre',
         configResolved(config) {
             root = config.root
         },

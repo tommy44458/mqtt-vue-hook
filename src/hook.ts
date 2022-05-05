@@ -1,4 +1,5 @@
 import mqtt from 'mqtt'
+import { eq } from './common'
 
 export interface MqttHook {
     disconnect: () => void,
@@ -11,37 +12,15 @@ export interface MqttHook {
     clearEvent: () => void,
 }
 
-interface Listener {
+export interface Listener {
     callback: (topic: string, message: string) => void
     vm: string
 }
 
+export interface mqttOptions extends mqtt.IClientOptions { }
+
 let client: mqtt.MqttClient | null = null
-
 const messageListeners = new Map()
-
-const eq = (str1: string, str2: string) => {
-    let arr1 = str1.split('/')
-    let arr2 = str2.split('/')
-    if (!str1.includes('#') && !str2.includes('#') && arr1.length !== arr2.length) {
-        return false
-    }
-    if (arr2.length < arr1.length) {
-        arr2 = str1.split('/')
-        arr1 = str2.split('/')
-    }
-    let ret = true
-    arr1.forEach((val, i) => {
-        if (val === '+' || val === '#'
-            || (arr2[i] && arr2[i] === '+')
-            || (arr2[i] && arr2[i] === '#')
-            || (arr2[i] && arr2[i] === val)) {
-            return
-        }
-        ret = false
-    })
-    return ret
-}
 
 const onConnectFail = () => {
     client?.on('error', error => {
@@ -70,7 +49,7 @@ const onReconnect = () => {
     })
 }
 
-export const connect = async (_options: mqtt.IClientOptions) => {
+export const connect = async (_options: mqttOptions) => {
     client = mqtt.connect(`${_options.protocol}://${_options.host}:${_options.port}`, _options)
     client.on('connect', () => {
         console.log(`success connect to host:${_options.host}`)
@@ -81,16 +60,15 @@ export const connect = async (_options: mqtt.IClientOptions) => {
 }
 
 const disconnect = () => {
-    if (client) {
-        client.end()
-        client = null
-        console.log('mqtt disconnected')
-    }
+    client?.end()
+    client = null
+    console.log('mqtt disconnected')
 }
 
-const reconnect = (_options: mqtt.IClientOptions) => {
+const reconnect = (_options: mqttOptions) => {
     disconnect()
     connect(_options)
+    console.log('mqtt reconnect')
 }
 
 const subscribe = (topicArray: string[], qos: mqtt.QoS = 1) => {
@@ -105,18 +83,15 @@ const unSubscribe = (unTopic: string) => {
 
 const publish = (topic: string, message: string, qos: mqtt.QoS = 0) => {
     if (!client?.connected) {
-        console.log('client is disconnected')
+        console.error('mqtt client is disconnected')
     } else {
         client.publish(topic, message, { qos })
     }
 }
 
 const registerEvent = (topic: string, callback: (topic: string, message: string) => void, vm = 'none') => {
-    if (typeof callback === 'function') {
-        messageListeners.has(topic) || messageListeners.set(topic, [])
-        messageListeners.get(topic).push({ callback, vm })
-        // console.log('registerEvent', callback, vm)
-    }
+    messageListeners.has(topic) || messageListeners.set(topic, [])
+    messageListeners.get(topic).push({ callback, vm })
 }
 
 const unRegisterEvent = (topic: string, vm = 'none') => {
