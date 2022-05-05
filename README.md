@@ -2,6 +2,7 @@
 
 [![NPM version](https://img.shields.io/npm/v/mqtt-vue-hook.svg)](https://www.npmjs.com/package/mqtt-vue-hook)
 [![NPM version](https://img.shields.io/npm/dm/mqtt-vue-hook)](https://www.npmjs.com/package/mqtt-vue-hook)
+[![NPM version](https://img.shields.io/npms-io/final-score/mqtt-vue-hook)](https://www.npmjs.com/package/mqtt-vue-hook)
 
 Connect to mqtt broker, support Vue3, Vite.
 
