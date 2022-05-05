@@ -3,7 +3,7 @@ import { eq } from './common'
 
 export interface MqttHook {
     disconnect: () => void,
-    reconnect: (options: mqtt.IClientOptions) => void,
+    reconnect: (url: string, options: mqtt.IClientOptions) => void,
     subscribe: (topicArray: string[], qos?: mqtt.QoS) => void,
     unSubscribe: (unTopic: string) => void,
     publish: (topic: string, message: string, qos?: mqtt.QoS) => void,
@@ -49,10 +49,10 @@ const onReconnect = () => {
     })
 }
 
-export const connect = async (_options: mqttOptions) => {
-    client = mqtt.connect(`${_options.protocol}://${_options.host}:${_options.port}`, _options)
+export const connect = async (url: string, _options: mqttOptions) => {
+    client = mqtt.connect(url, _options)
     client.on('connect', () => {
-        console.log(`success connect to host:${_options.host}`)
+        console.log(`success connect to host:${url}`)
     })
     onMessage()
     onReconnect()
@@ -65,9 +65,9 @@ const disconnect = () => {
     console.log('mqtt disconnected')
 }
 
-const reconnect = (_options: mqttOptions) => {
+const reconnect = (url: string, _options: mqttOptions) => {
     disconnect()
-    connect(_options)
+    connect(url, _options)
     console.log('mqtt reconnect')
 }
 
