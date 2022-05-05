@@ -5,17 +5,22 @@ Connect to mqtt broker, support Vue3, Vite.
 ## Install
 
 #### Npm
-``` bash
+
+```bash
 npm install mqtt-vue-hook --save
 ```
+
 #### Yarn
-``` bash
+
+```bash
 yarn add mqtt-vue-hook -D
 ```
 
 ## Usage
-####  Vue instance
-``` ts
+
+#### Vue instance
+
+```ts
 // src/main.ts
 import { createApp } from 'vue'
 import App from './App.vue'
@@ -24,86 +29,90 @@ const app = createApp(App)
 
 import mqttVueHook from 'mqtt-vue-hook'
 // app.use(mqttVueHook, options)
-app.use(mqttVueHook, {
-    protocol: 'ws',
-    host: mqttHost,
-    port: mqttPort,
-    clean: false,
-    keepalive: 60,
-    clientId: `mqtt_client_${Math.random().toString(16).substring(2, 10)}`,
-    connectTimeout: 4000,
+app.use(mqttVueHook, 'mqtt://url', {
+  clean: false,
+  keepalive: 60,
+  clientId: `mqtt_client_${Math.random().toString(16).substring(2, 10)}`,
+  connectTimeout: 4000,
 })
 ```
+
 options: https://github.com/mqttjs/MQTT.js#client
 
 #### Subscribe
-``` vue
+
+```vue
 <script setup lang="ts">
 import { useMQTT } from 'mqtt-vue-hook'
 
 onMounted(() => {
-	const mqttHook = useMQTT()
-        // mqttHook.subscribe([...topic], qos)
-        // mqttHook.unSubscribe(topic)
-        // '+' == /.+/
-        // '#' == /[A-Za-z0-9/]/
-	mqttHook.subscribe(['+/root/#'], 1)
+  const mqttHook = useMQTT()
+  // mqttHook.subscribe([...topic], qos)
+  // mqttHook.unSubscribe(topic)
+  // '+' == /.+/
+  // '#' == /[A-Za-z0-9/]/
+  mqttHook.subscribe(['+/root/#'], 1)
 })
 </script>
 ```
+
 options: https://github.com/mqttjs/MQTT.js#subscribe
 
 #### Publish
-``` vue
+
+```vue
 <script setup lang="ts">
 import { useMQTT } from 'mqtt-vue-hook'
 
 onMounted(() => {
-	const mqttHook = useMQTT()
-        // mqttHook.publish(topic, message, qos)
-	mqttHook.publish(['test/root/1'], 'my message', 1)
+  const mqttHook = useMQTT()
+  // mqttHook.publish(topic, message, qos)
+  mqttHook.publish(['test/root/1'], 'my message', 1)
 })
 </script>
 ```
+
 options: https://github.com/mqttjs/MQTT.js#publish
 
 #### Register Event
-``` vue
+
+```vue
 <script setup lang="ts">
 import { useMQTT } from 'mqtt-vue-hook'
 
 const mqttHook = useMQTT()
 
 onMounted(() => {
-        // mqttHook.registerEvent(topic, callback function, vm = string)
-        // mqttHook.unRegisterEvent(topic, vm)
-	mqttHook.registerEvent(
-		'+/root/#',
-		(topic: string, message: string) => {
-			Notification({
-				title: topic,
-				message: message.toString(),
-				type: 'info',
-			})
-		},
-    		'string_key',
-	)
+  // mqttHook.registerEvent(topic, callback function, vm = string)
+  // mqttHook.unRegisterEvent(topic, vm)
+  mqttHook.registerEvent(
+    '+/root/#',
+    (topic: string, message: string) => {
+      Notification({
+        title: topic,
+        message: message.toString(),
+        type: 'info',
+      })
+    },
+    'string_key'
+  )
 })
 
 onUnmounted(() => {
-	// mqttHook.unRegisterEvent(topic, vm)
-	mqttHook.unRegisterEvent('+/root/#', 'string_key')
+  // mqttHook.unRegisterEvent(topic, vm)
+  mqttHook.unRegisterEvent('+/root/#', 'string_key')
 })
 </script>
 ```
 
-####  Typescript
-``` ts
+#### Typescript
+
+```ts
 import { useMQTT } from 'mqtt-vue-hook'
 const mqttHook = useMQTT()
 
 mqttHook.registerEvent('+/root/1', (topic: string, message: string) => {
-    console.log(topic, message.toString())
+  console.log(topic, message.toString())
 })
 mqttHook.publish(['test/root/1'], 'my message', 1)
 
