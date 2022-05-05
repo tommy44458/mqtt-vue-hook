@@ -1,5 +1,5 @@
 import mqtt from 'mqtt'
-import { eq } from './common'
+import common from './common'
 
 export interface MqttHook {
     disconnect: () => void,
@@ -17,7 +17,7 @@ export interface Listener {
     vm: string
 }
 
-export interface mqttOptions extends mqtt.IClientOptions { }
+export type MqttOptions = mqtt.IClientOptions
 
 let client: mqtt.MqttClient | null = null
 const messageListeners = new Map()
@@ -33,7 +33,7 @@ const onMessage = () => {
     client?.on('message', (topic: string, message: string) => {
         if (message) {
             messageListeners.forEach((listeners, key) => {
-                if (eq(topic, key) && listeners && listeners.length) {
+                if (common.eq(topic, key) && listeners && listeners.length) {
                     listeners.forEach((listener: Listener) => {
                         listener.callback(topic, message)
                     })
@@ -49,7 +49,7 @@ const onReconnect = () => {
     })
 }
 
-export const connect = async (url: string, _options: mqttOptions) => {
+export const connect = async (url: string, _options: MqttOptions) => {
     client = mqtt.connect(url, _options)
     client.on('connect', () => {
         console.log(`success connect to host:${url}`)
@@ -65,7 +65,7 @@ const disconnect = () => {
     console.log('mqtt disconnected')
 }
 
-const reconnect = (url: string, _options: mqttOptions) => {
+const reconnect = (url: string, _options: MqttOptions) => {
     disconnect()
     connect(url, _options)
     console.log('mqtt reconnect')
@@ -96,7 +96,7 @@ const registerEvent = (topic: string, callback: (topic: string, message: string)
 
 const unRegisterEvent = (topic: string, vm = 'none') => {
     const listeners: Listener[] = messageListeners.get(topic)
-    let indexArray: number[] = []
+    const indexArray: number[] = []
 
     if (listeners && listeners.length) {
         for (let i = listeners.length - 1; i >= 0; i -= 1) {

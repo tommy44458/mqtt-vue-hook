@@ -8,9 +8,6 @@ module.exports = {
         node: true,
         'vue/setup-compiler-macros': true,
     },
-    globals: {
-        expect: true,
-    },
     extends: [
         'prettier',
         'airbnb-base',
@@ -75,6 +72,7 @@ module.exports = {
         },
     },
     globals: {
+        expect: true,
         defineProps: 'readonly',
         defineEmits: 'readonly',
         defineExpose: 'readonly',

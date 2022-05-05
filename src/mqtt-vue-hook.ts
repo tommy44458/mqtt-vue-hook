@@ -1,8 +1,8 @@
 import { App } from 'vue'
-import { connect, mqttHook, mqttOptions } from './hook'
+import { connect, mqttHook, MqttOptions } from './hook'
 
 export default {
-    install: async (_app: App, url: string, options: mqttOptions) => {
+    install: async (_app: App, url: string, options: MqttOptions) => {
         await connect(url, options)
     },
 }
