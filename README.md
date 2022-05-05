@@ -29,7 +29,7 @@ const app = createApp(App)
 
 import mqttVueHook from 'mqtt-vue-hook'
 // app.use(mqttVueHook, options)
-app.use(mqttVueHook, 'mqtt://url', {
+app.use(mqttVueHook, 'mqtt://tommy_mqtt.com', {
   clean: false,
   keepalive: 60,
   clientId: `mqtt_client_${Math.random().toString(16).substring(2, 10)}`,
