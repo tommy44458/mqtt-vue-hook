@@ -13,6 +13,10 @@
     "lib": ["esnext", "dom"],
     "skipLibCheck": true
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"],
+  "exclude": [
+    "./node_modules/",
+    "./dist/"
+  ],
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue", "test/*.test.ts", "plugins/*.ts", "test/dist.test.mjs", "src/test/dist.test.cjs"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

@@ -10,6 +10,7 @@ export interface MqttHook {
     registerEvent: (topic: string, callback: (topic: string, message: string) => void, vm?: string) => void,
     unRegisterEvent: (topic: string, vm?: any) => void,
     clearEvent: () => void,
+    test: () => boolean,
 }
 
 export interface Listener {
@@ -124,6 +125,8 @@ const clearEvent = () => {
     messageListeners.clear()
 }
 
+const test = () => common.eq('+/test/#', '1/test/erw/2342')
+
 export const mqttHook = (): MqttHook => ({
     disconnect,
     reconnect,
@@ -133,4 +136,5 @@ export const mqttHook = (): MqttHook => ({
     registerEvent,
     unRegisterEvent,
     clearEvent,
+    test,
 })
