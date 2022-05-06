@@ -6,6 +6,9 @@
 
 Connect to mqtt broker, support Vue3, Vite.
 
+## Example
+[A LIGHT vue3 starter support MQTT](https://github.com/tommy44458/light-vue3-starter)
+
 ## Install
 
 #### Npm
