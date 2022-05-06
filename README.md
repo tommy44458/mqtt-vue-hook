@@ -31,9 +31,12 @@ import App from './App.vue'
 
 const app = createApp(App)
 
+// protocol = 'wss', 'ws', 'mqtt', ...
+// host = ip or domain
+// port = 8083, 1883, ...
 import mqttVueHook from 'mqtt-vue-hook'
 // app.use(mqttVueHook, options)
-app.use(mqttVueHook, 'mqtt://tommy_mqtt.com', {
+app.use(mqttVueHook, `${protocol}://${host}:${port}`, {
   clean: false,
   keepalive: 60,
   clientId: `mqtt_client_${Math.random().toString(16).substring(2, 10)}`,
