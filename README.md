@@ -6,7 +6,6 @@
 [![license](https://img.shields.io/npm/l/mqtt-vue-hook)](https://www.npmjs.com/package/mqtt-vue-hook)
 [![codacy](https://img.shields.io/codacy/grade/167baac7ff374d359dac9f885f566c0f)](https://www.npmjs.com/package/mqtt-vue-hook)
 
-
 Connect to mqtt broker, support Vue3, Vite.
 
 ## Example
@@ -15,13 +14,9 @@ Connect to mqtt broker, support Vue3, Vite.
 
 ## Install
 
-#### Npm
-
 ```bash
 npm install mqtt-vue-hook --save
 ```
-
-#### Yarn
 
 ```bash
 yarn add mqtt-vue-hook -D
@@ -29,7 +24,7 @@ yarn add mqtt-vue-hook -D
 
 ## Usage
 
-#### Vue instance
+### Vue instance
 
 ```ts
 // src/main.ts
@@ -53,7 +48,7 @@ app.use(mqttVueHook, `${protocol}://${host}:${port}`, {
 
 options: https://github.com/mqttjs/MQTT.js#client
 
-#### Subscribe
+### Subscribe
 
 ```vue
 <script setup lang="ts">
@@ -72,7 +67,7 @@ onMounted(() => {
 
 options: https://github.com/mqttjs/MQTT.js#subscribe
 
-#### Publish
+### Publish
 
 ```vue
 <script setup lang="ts">
@@ -88,7 +83,7 @@ onMounted(() => {
 
 options: https://github.com/mqttjs/MQTT.js#publish
 
-#### Register Event
+### Register Event
 
 ```vue
 <script setup lang="ts">
@@ -119,7 +114,7 @@ onUnmounted(() => {
 </script>
 ```
 
-#### Typescript
+### Typescript
 
 ```ts
 import { useMQTT } from 'mqtt-vue-hook'
