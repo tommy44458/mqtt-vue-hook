@@ -51,6 +51,7 @@ const onReconnect = () => {
 }
 
 export const connect = async (url: string, _options: MqttOptions) => {
+    console.log('mqtt connect start')
     client = mqtt.connect(url, _options)
     client.on('connect', () => {
         console.log(`success connect to host:${url}`)
@@ -125,7 +126,30 @@ const clearEvent = () => {
     messageListeners.clear()
 }
 
-const test = () => common.eq('+/test/#', '1/test/erw/2342')
+const test = () => {
+    const commonTest = common.eq('+/test/#', '1/test/erw/2342')
+    reconnect('wss://broker.emqx.io:8084', {
+        clean: false,
+        keepalive: 60,
+        clientId: `mqtt_client_${Math.random().toString(16).substring(2, 10)}`,
+        path: '/mqtt',
+        connectTimeout: 4000,
+    })
+
+
+    subscribe(['mqtt-vue-hook/test', 'mqtt-vue-hook/test2'])
+    registerEvent('mqtt-vue-hook/test', (topic: string, message: string) => {
+        console.log(topic, message.toString())
+    })
+
+    unSubscribe('mqtt-vue-hook/test2')
+    unRegisterEvent('mqtt-vue-hook/test')
+    clearEvent()
+
+    disconnect()
+
+    return commonTest
+}
 
 export const mqttHook = (): MqttHook => ({
     disconnect,

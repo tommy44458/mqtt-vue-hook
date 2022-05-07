@@ -4,7 +4,6 @@ stage: publish
 script:
     - yarn install
     - yarn build
-    - yarn test
 artifacts:
     paths:
         - dist
