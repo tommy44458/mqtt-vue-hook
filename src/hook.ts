@@ -91,15 +91,15 @@ export const connect = async (url: string, _options: MqttOptions) => {
     client = mqtt.connect(url, _options)
     client.on('connect', () => {
         console.log(`success connect to host:${url}`)
-        publishBuffer.forEach(({ topic, message, qos }) => {
-            publish(topic, message, qos)
-        })
-        publishBuffer.splice(0, publishBuffer.length)
-
         subscribeBuffer.forEach(({ topicArray, qos }) => {
             subscribe(topicArray, qos)
         })
         subscribeBuffer.splice(0, subscribeBuffer.length)
+
+        publishBuffer.forEach(({ topic, message, qos }) => {
+            publish(topic, message, qos)
+        })
+        publishBuffer.splice(0, publishBuffer.length)
     })
     onMessage()
     onReconnect()
