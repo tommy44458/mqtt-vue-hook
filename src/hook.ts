@@ -18,10 +18,17 @@ export interface Listener {
     vm: string
 }
 
+interface PublishArgs {
+    topic: string,
+    message: string,
+    qos: mqtt.QoS,
+}
+
 export type MqttOptions = mqtt.IClientOptions
 
 let client: mqtt.MqttClient | null = null
 const messageListeners = new Map()
+const publishBuffer: PublishArgs[] = []
 
 const onConnectFail = () => {
     client?.on('error', error => {
@@ -50,11 +57,27 @@ const onReconnect = () => {
     })
 }
 
+const publish = (topic: string, message: string, qos: mqtt.QoS = 0) => {
+    if (!client?.connected) {
+        publishBuffer.push({
+            topic: topic,
+            message: message,
+            qos: qos,
+        })
+    } else {
+        client.publish(topic, message, { qos })
+    }
+}
+
 export const connect = async (url: string, _options: MqttOptions) => {
     console.log('mqtt connect start')
     client = mqtt.connect(url, _options)
     client.on('connect', () => {
         console.log(`success connect to host:${url}`)
+        publishBuffer.forEach(({ topic, message, qos }) => {
+            publish(topic, message, qos)
+        })
+        publishBuffer.splice(0, publishBuffer.length)
     })
     onMessage()
     onReconnect()
@@ -81,14 +104,6 @@ const unSubscribe = (unTopic: string) => {
     client?.unsubscribe(unTopic, () => {
         console.log(`unsubscribe: ${unTopic}`)
     })
-}
-
-const publish = (topic: string, message: string, qos: mqtt.QoS = 0) => {
-    if (!client?.connected) {
-        console.error('mqtt client is disconnected')
-    } else {
-        client.publish(topic, message, { qos })
-    }
 }
 
 const registerEvent = (topic: string, callback: (topic: string, message: string) => void, vm = 'none') => {
