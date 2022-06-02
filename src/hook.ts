@@ -24,11 +24,17 @@ interface PublishArgs {
     qos: mqtt.QoS,
 }
 
+interface SubscribeArgs {
+    topicArray: string[],
+    qos: mqtt.QoS,
+}
+
 export type MqttOptions = mqtt.IClientOptions
 
 let client: mqtt.MqttClient | null = null
 const messageListeners = new Map()
 const publishBuffer: PublishArgs[] = []
+const subscribeBuffer: SubscribeArgs[] = []
 
 const onConnectFail = () => {
     client?.on('error', error => {
@@ -57,6 +63,17 @@ const onReconnect = () => {
     })
 }
 
+const subscribe = (topicArray: string[], qos: mqtt.QoS = 1) => {
+    if (!client?.connected) {
+        subscribeBuffer.push({
+            topicArray: topicArray,
+            qos: qos,
+        })
+    } else {
+        client?.subscribe(topicArray, { qos })
+    }
+}
+
 const publish = (topic: string, message: string, qos: mqtt.QoS = 0) => {
     if (!client?.connected) {
         publishBuffer.push({
@@ -78,6 +95,11 @@ export const connect = async (url: string, _options: MqttOptions) => {
             publish(topic, message, qos)
         })
         publishBuffer.splice(0, publishBuffer.length)
+
+        subscribeBuffer.forEach(({ topicArray, qos }) => {
+            subscribe(topicArray, qos)
+        })
+        subscribeBuffer.splice(0, subscribeBuffer.length)
     })
     onMessage()
     onReconnect()
@@ -94,10 +116,6 @@ const reconnect = (url: string, _options: MqttOptions) => {
     disconnect()
     connect(url, _options)
     console.log('mqtt reconnect')
-}
-
-const subscribe = (topicArray: string[], qos: mqtt.QoS = 1) => {
-    client?.subscribe(topicArray, { qos })
 }
 
 const unSubscribe = (unTopic: string) => {
