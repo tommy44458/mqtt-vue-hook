@@ -1,6 +1,6 @@
 {
   "name": "mqtt-vue-hook",
-  "version": "1.2.6",
+  "version": "1.2.7",
   "type": "module",
   "description": "Connect to mqtt broker, implementation for Vuejs 3 and Vite.",
   "files": [
@@ -36,7 +36,7 @@
   "dependencies": {
     "@rollup/pluginutils": "^4.2.1",
     "mqtt": "^4.3.7",
-    "vue": "^3.2.25"
+    "vue": "^3.0.0"
   },
   "devDependencies": {
     "@types/node": "^17.0.27",
