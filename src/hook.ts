@@ -49,7 +49,11 @@ const onMessage = () => {
             messageListeners.forEach((listeners, key) => {
                 if (common.eq(topic, key) && listeners && listeners.length) {
                     listeners.forEach((listener: Listener) => {
-                        listener.callback(topic, message)
+                        try {
+                            listener.callback(topic, message)
+                        } catch (error) {
+                            console.error(error)
+                        }
                     })
                 }
             })

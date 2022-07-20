@@ -1,24 +1,21 @@
-const eq = (str1: string, str2: string) => {
-    let arr1 = str1.split('/')
-    let arr2 = str2.split('/')
-    if (!str1.includes('#') && !str2.includes('#') && arr1.length !== arr2.length) {
-        return false
+const eq = (filter: string, topic: string, handleSharedSubscription: boolean = false) => {
+    const filterArray = filter.split('/')
+
+    if (handleSharedSubscription && filterArray.length > 2 && filter.startsWith('$share/')) {
+        filterArray.splice(0, 2)
     }
-    if (arr2.length < arr1.length) {
-        arr2 = str1.split('/')
-        arr1 = str2.split('/')
+
+    const length = filterArray.length
+    const topicArray = topic.split('/')
+
+    for (let i = 0; i < length; ++i) {
+        const left = filterArray[i]
+        const right = topicArray[i]
+        if (left === '#') return topicArray.length >= length - 1
+        if (left !== '+' && left !== right) return false
     }
-    let ret = true
-    arr1.forEach((val, i) => {
-        if (val === '+' || val === '#'
-            || (arr2[i] && arr2[i] === '+')
-            || (arr2[i] && arr2[i] === '#')
-            || (arr2[i] && arr2[i] === val)) {
-            return
-        }
-        ret = false
-    })
-    return ret
+
+    return length === topicArray.length
 }
 
 export default { eq }
