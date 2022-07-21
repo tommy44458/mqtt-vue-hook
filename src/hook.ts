@@ -9,11 +9,11 @@ export interface MqttHook {
     publish: (topic: string, message: string, qos?: mqtt.QoS) => Promise<void>,
     registerEvent: (
         topic: string,
-        callback: (topic: string, message: string) => Promise<void>,
+        callback: (topic: string, message: string) => void,
         vm?: string
     ) => Promise<void>,
     unRegisterEvent: (topic: string, vm?: any) => Promise<void>,
-    clearEvent: () => void,
+    clearEvent: () => Promise<void>,
     test: () => Promise<boolean>,
 }
 
@@ -52,13 +52,13 @@ const onMessage = async () => {
         if (message) {
             messageListeners.forEach((listeners, key) => {
                 if (common.eq(topic, key) && listeners && listeners.length) {
-                    listeners.forEach((listener: Listener) => {
+                    for (let i = 0; i < listeners.length; i += 1) {
                         try {
-                            listener.callback(topic, message)
+                            listeners[i].callback(topic, message)
                         } catch (error) {
                             console.error(error)
                         }
-                    })
+                    }
                 }
             })
         }
