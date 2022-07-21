@@ -2,13 +2,17 @@ import mqtt from 'mqtt'
 import common from './common'
 
 export interface MqttHook {
-    disconnect: () => void,
-    reconnect: (url: string, options: mqtt.IClientOptions) => void,
-    subscribe: (topicArray: string[], qos?: mqtt.QoS) => void,
-    unSubscribe: (unTopic: string) => void,
-    publish: (topic: string, message: string, qos?: mqtt.QoS) => void,
-    registerEvent: (topic: string, callback: (topic: string, message: string) => void, vm?: string) => void,
-    unRegisterEvent: (topic: string, vm?: any) => void,
+    disconnect: () => Promise<void>,
+    reconnect: (url: string, options: mqtt.IClientOptions) => Promise<void>,
+    subscribe: (topicArray: string[], qos?: mqtt.QoS) => Promise<void>,
+    unSubscribe: (unTopic: string) => Promise<void>,
+    publish: (topic: string, message: string, qos?: mqtt.QoS) => Promise<void>,
+    registerEvent: (
+        topic: string,
+        callback: (topic: string, message: string) => Promise<void>,
+        vm?: string
+    ) => Promise<void>,
+    unRegisterEvent: (topic: string, vm?: any) => Promise<void>,
     clearEvent: () => void,
     test: () => Promise<boolean>,
 }
