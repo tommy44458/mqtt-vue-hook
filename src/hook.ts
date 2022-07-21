@@ -10,7 +10,7 @@ export interface MqttHook {
     registerEvent: (topic: string, callback: (topic: string, message: string) => void, vm?: string) => void,
     unRegisterEvent: (topic: string, vm?: any) => void,
     clearEvent: () => void,
-    test: () => boolean,
+    test: () => Promise<boolean>,
 }
 
 export interface Listener {
@@ -36,14 +36,14 @@ const messageListeners = new Map()
 const publishBuffer: PublishArgs[] = []
 const subscribeBuffer: SubscribeArgs[] = []
 
-const onConnectFail = () => {
+const onConnectFail = async () => {
     client?.on('error', error => {
         console.log('connect fail', error)
         client?.end()
     })
 }
 
-const onMessage = () => {
+const onMessage = async () => {
     client?.on('message', (topic: string, message: string) => {
         if (message) {
             messageListeners.forEach((listeners, key) => {
@@ -61,13 +61,13 @@ const onMessage = () => {
     })
 }
 
-const onReconnect = () => {
+const onReconnect = async () => {
     client?.on('reconnect', () => {
         console.log('try to reconnect:', client?.options)
     })
 }
 
-const subscribe = (topicArray: string[], qos: mqtt.QoS = 1) => {
+const subscribe = async (topicArray: string[], qos: mqtt.QoS = 1) => {
     if (!client?.connected) {
         subscribeBuffer.push({
             topicArray: topicArray,
@@ -78,7 +78,7 @@ const subscribe = (topicArray: string[], qos: mqtt.QoS = 1) => {
     }
 }
 
-const publish = (topic: string, message: string, qos: mqtt.QoS = 0) => {
+const publish = async (topic: string, message: string, qos: mqtt.QoS = 0) => {
     if (!client?.connected) {
         publishBuffer.push({
             topic: topic,
@@ -110,30 +110,30 @@ export const connect = async (url: string, _options: MqttOptions) => {
     onConnectFail()
 }
 
-const disconnect = () => {
+const disconnect = async () => {
     client?.end()
     client = null
     console.log('mqtt disconnected')
 }
 
-const reconnect = (url: string, _options: MqttOptions) => {
+const reconnect = async (url: string, _options: MqttOptions) => {
     disconnect()
     connect(url, _options)
     console.log('mqtt reconnect')
 }
 
-const unSubscribe = (unTopic: string) => {
+const unSubscribe = async (unTopic: string) => {
     client?.unsubscribe(unTopic, () => {
         console.log(`unsubscribe: ${unTopic}`)
     })
 }
 
-const registerEvent = (topic: string, callback: (topic: string, message: string) => void, vm = 'none') => {
+const registerEvent = async (topic: string, callback: (topic: string, message: string) => void, vm = 'none') => {
     messageListeners.has(topic) || messageListeners.set(topic, [])
     messageListeners.get(topic).push({ callback, vm })
 }
 
-const unRegisterEvent = (topic: string, vm = 'none') => {
+const unRegisterEvent = async (topic: string, vm = 'none') => {
     const listeners: Listener[] = messageListeners.get(topic)
     const indexArray: number[] = []
 
@@ -159,11 +159,11 @@ const unRegisterEvent = (topic: string, vm = 'none') => {
     }
 }
 
-const clearEvent = () => {
+const clearEvent = async () => {
     messageListeners.clear()
 }
 
-const test = () => {
+const test = async () => {
     const commonTest = common.eq('+/test/#', '1/test/erw/2342')
     reconnect('wss://broker.emqx.io:8084', {
         clean: false,
