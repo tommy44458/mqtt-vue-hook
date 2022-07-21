@@ -51,7 +51,7 @@ const onMessage = async () => {
     client?.on('message', (topic: string, message: string) => {
         if (message) {
             messageListeners.forEach((listeners, key) => {
-                if (common.eq(topic, key) && listeners && listeners.length) {
+                if (common.eq(key, topic) && listeners && listeners.length) {
                     for (let i = 0; i < listeners.length; i += 1) {
                         try {
                             listeners[i].callback(topic, message)
