@@ -1,5 +1,6 @@
 import mqtt from 'mqtt'
 import common from './common'
+import { eventHook } from './event'
 
 export interface MqttHook {
     disconnect: () => Promise<void>,
@@ -17,11 +18,6 @@ export interface MqttHook {
     test: () => Promise<boolean>,
 }
 
-export interface Listener {
-    callback: (topic: string, message: string) => void
-    vm: string
-}
-
 interface PublishArgs {
     topic: string,
     message: string,
@@ -35,41 +31,10 @@ interface SubscribeArgs {
 
 export type MqttOptions = mqtt.IClientOptions
 
+const event = eventHook()
 let client: mqtt.MqttClient | null = null
-const messageListeners = new Map()
 const publishBuffer: PublishArgs[] = []
 const subscribeBuffer: SubscribeArgs[] = []
-
-const onConnectFail = async () => {
-    client?.on('error', error => {
-        console.log('connect fail', error)
-        client?.end()
-    })
-}
-
-const onMessage = async () => {
-    client?.on('message', (topic: string, message: string) => {
-        if (message) {
-            messageListeners.forEach((listeners, key) => {
-                if (common.eq(key, topic) && listeners && listeners.length) {
-                    for (let i = 0; i < listeners.length; i += 1) {
-                        try {
-                            listeners[i].callback(topic, message)
-                        } catch (error) {
-                            console.error(error)
-                        }
-                    }
-                }
-            })
-        }
-    })
-}
-
-const onReconnect = async () => {
-    client?.on('reconnect', () => {
-        console.log('try to reconnect:', client?.options)
-    })
-}
 
 const subscribe = async (topicArray: string[], qos: mqtt.QoS = 1) => {
     if (!client?.connected) {
@@ -80,6 +45,12 @@ const subscribe = async (topicArray: string[], qos: mqtt.QoS = 1) => {
     } else {
         client?.subscribe(topicArray, { qos })
     }
+}
+
+const unSubscribe = async (unTopic: string) => {
+    client?.unsubscribe(unTopic, () => {
+        console.log(`unsubscribe: ${unTopic}`)
+    })
 }
 
 const publish = async (topic: string, message: string, qos: mqtt.QoS = 0) => {
@@ -94,78 +65,78 @@ const publish = async (topic: string, message: string, qos: mqtt.QoS = 0) => {
     }
 }
 
-export const connect = async (url: string, _options: MqttOptions) => {
-    console.log('mqtt connect start')
-    client = mqtt.connect(url, _options)
-    client.on('connect', () => {
-        console.log(`success connect to host:${url}`)
-        subscribeBuffer.forEach(({ topicArray, qos }) => {
-            subscribe(topicArray, qos)
-        })
-        subscribeBuffer.splice(0, subscribeBuffer.length)
-
-        publishBuffer.forEach(({ topic, message, qos }) => {
-            publish(topic, message, qos)
-        })
-        publishBuffer.splice(0, publishBuffer.length)
+const onConnectFail = async () => {
+    client?.on('error', (error: string) => {
+        console.log('connect fail', error)
+        client?.end()
+        event.runEvent('on-connect-fail', String(error))
     })
+}
+
+const onMessage = async () => {
+    client?.on('message', (topic: string, message: string) => {
+        if (message) event.runEvent(topic, message)
+    })
+}
+
+const onConnect = async (url: string) => {
+    client?.on('connect', () => {
+        console.log(`success connect to host:${url}`)
+        subscribeBuffer.forEach(({ topicArray, qos }) => subscribe(topicArray, qos))
+        subscribeBuffer.length = 0
+
+        publishBuffer.forEach(({ topic, message, qos }) => publish(topic, message, qos))
+        publishBuffer.length = 0
+
+        event.runEvent('on-connect', '')
+    })
+}
+
+const onReconnect = async () => {
+    client?.on('reconnect', () => {
+        console.log('try to reconnect:', client?.options)
+        event.runEvent('on-reconnect', '')
+    })
+}
+
+const onEnd = async () => {
+    client?.on('end', () => {
+        console.log('disconnected:', client?.options)
+        event.runEvent('on-disconnect', '')
+    })
+}
+
+export const connect = async (url: string, _options: MqttOptions) => {
+    console.log('mqtt connecting')
+    client = mqtt.connect(url, _options)
+    onConnect(url)
     onMessage()
     onReconnect()
+    onEnd()
     onConnectFail()
 }
 
 const disconnect = async () => {
     client?.end()
     client = null
-    console.log('mqtt disconnected')
+    console.log('mqtt disconnecting')
 }
 
 const reconnect = async (url: string, _options: MqttOptions) => {
     disconnect()
     connect(url, _options)
-    console.log('mqtt reconnect')
+    console.log('mqtt reconnecting')
 }
 
-const unSubscribe = async (unTopic: string) => {
-    client?.unsubscribe(unTopic, () => {
-        console.log(`unsubscribe: ${unTopic}`)
-    })
-}
+const unRegisterEvent = async (topic: string, vm = 'none') => event.unRegisterEvent(topic, vm)
 
-const registerEvent = async (topic: string, callback: (topic: string, message: string) => void, vm = 'none') => {
-    messageListeners.has(topic) || messageListeners.set(topic, [])
-    messageListeners.get(topic).push({ callback, vm })
-}
+const registerEvent = async (
+    topic: string,
+    callback: (topic: string, message: string) => void,
+    vm = 'none',
+) => event.registerEvent(topic, callback, vm)
 
-const unRegisterEvent = async (topic: string, vm = 'none') => {
-    const listeners: Listener[] = messageListeners.get(topic)
-    const indexArray: number[] = []
-
-    if (listeners && listeners.length) {
-        for (let i = listeners.length - 1; i >= 0; i -= 1) {
-            const listener: Listener = listeners[i]
-            if (listener.vm === vm) {
-                indexArray.push(i)
-            }
-        }
-
-        if (indexArray.length > 0) {
-            indexArray.forEach(index => {
-                listeners.splice(index, 1)
-            })
-
-            if (listeners.length > 0) {
-                messageListeners.set(topic, listeners)
-            } else {
-                messageListeners.delete(topic)
-            }
-        }
-    }
-}
-
-const clearEvent = async () => {
-    messageListeners.clear()
-}
+const clearEvent = async () => event.clearEvent()
 
 const test = async () => {
     const commonTest = common.eq('+/test/#', '1/test/erw/2342')
