@@ -105,11 +105,19 @@ onMounted(() => {
         },
         'string_key',
     )
+    mqttHook.registerEvent(
+        'on-connect', // mqtt status: on-connect, on-reconnect, on-disconnect, on-connect-fail
+        (topic: string, message: string) => {
+            console.log('mqtt connected')
+        },
+        'string_key',
+    )
 })
 
 onUnmounted(() => {
     // mqttHook.unRegisterEvent(topic, vm)
     mqttHook.unRegisterEvent('+/root/#', 'string_key')
+    mqttHook.unRegisterEvent('on-connect', 'string_key')
 })
 </script>
 ```
