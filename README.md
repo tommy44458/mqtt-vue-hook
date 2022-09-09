@@ -6,7 +6,7 @@
 [![license](https://img.shields.io/npm/l/mqtt-vue-hook)](https://www.npmjs.com/package/mqtt-vue-hook)
 [![codacy](https://img.shields.io/codacy/grade/167baac7ff374d359dac9f885f566c0f)](https://www.npmjs.com/package/mqtt-vue-hook)
 
-Connect to mqtt broker, support Vue3, Vite.
+Connect to mqtt broker using typescript, support VueJs3, Vite, ReactJs.
 
 ## Example
 
@@ -39,6 +39,24 @@ const app = createApp(App)
 import mqttVueHook from 'mqtt-vue-hook'
 // app.use(mqttVueHook, options)
 app.use(mqttVueHook, `${protocol}://${host}:${port}`, {
+    clean: false,
+    keepalive: 60,
+    clientId: `mqtt_client_${Math.random().toString(16).substring(2, 10)}`,
+    connectTimeout: 4000,
+})
+```
+
+### React or Typescript instance
+
+```ts
+// src/app.tsx
+// protocol = 'wss', 'ws', 'mqtt', ...
+// host = ip or domain
+// port = 8083, 1883, ...
+import { useMQTT } from 'mqtt-vue-hook'
+const mqttHook = useMQTT()
+
+mqttHook.connect(`${protocol}://${host}:${port}`, {
     clean: false,
     keepalive: 60,
     clientId: `mqtt_client_${Math.random().toString(16).substring(2, 10)}`,
