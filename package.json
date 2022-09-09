@@ -1,8 +1,8 @@
 {
   "name": "mqtt-vue-hook",
-  "version": "1.2.14",
+  "version": "1.2.15",
   "type": "module",
-  "description": "Connect to mqtt broker, implementation for Vuejs 3 and Vite.",
+  "description": "Connect to mqtt broker using typescript, support VueJs3, Vite, ReactJs.",
   "files": [
     "dist/*"
   ],
@@ -21,6 +21,7 @@
   "license": "MIT",
   "keywords": [
     "vue",
+    "react",
     "mqtt",
     "vue3",
     "hook",

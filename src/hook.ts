@@ -3,6 +3,7 @@ import common from './common'
 import { eventHook } from './event'
 
 export interface MqttHook {
+    connect: (url: string, _options: MqttOptions) => Promise<void>,
     disconnect: () => Promise<void>,
     reconnect: (url: string, options: mqtt.IClientOptions) => Promise<void>,
     subscribe: (topicArray: string[], qos?: mqtt.QoS) => Promise<void>,
@@ -106,20 +107,21 @@ const onEnd = async () => {
     })
 }
 
+const disconnect = async () => {
+    console.log('mqtt disconnecting')
+    client?.end()
+    client = null
+}
+
 export const connect = async (url: string, _options: MqttOptions) => {
     console.log('mqtt connecting')
+    if (client) await disconnect()
     client = mqtt.connect(url, _options)
     onConnect(url)
     onMessage()
     onReconnect()
     onEnd()
     onConnectFail()
-}
-
-const disconnect = async () => {
-    client?.end()
-    client = null
-    console.log('mqtt disconnecting')
 }
 
 const reconnect = async (url: string, _options: MqttOptions) => {
@@ -164,6 +166,7 @@ const test = async () => {
 }
 
 export const mqttHook = (): MqttHook => ({
+    connect,
     disconnect,
     reconnect,
     subscribe,
