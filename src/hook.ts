@@ -7,9 +7,24 @@ export interface MqttHook {
     connect: (url: string, _options: MqttOptions) => Promise<void>,
     disconnect: () => Promise<void>,
     reconnect: (url: string, options: mqtt.IClientOptions) => Promise<void>,
-    subscribe: (topicArray: string[], qos?: mqtt.QoS) => Promise<void>,
-    unSubscribe: (unTopic: string) => Promise<void>,
-    publish: (topic: string, message: string, qos?: mqtt.QoS) => Promise<void>,
+    subscribe: (
+        topicArray: string[],
+        qos?: mqtt.QoS,
+        opts?: SubscribeOptions,
+        callback?: mqtt.ClientSubscribeCallback
+    ) => Promise<void>,
+    unSubscribe: (
+        unTopic: string,
+        opts?: Object,
+        callback?: mqtt.PacketCallback
+    ) => Promise<void>,
+    publish: (
+        topic: string,
+        message: string,
+        qos?: mqtt.QoS,
+        opts?: PublishOptions,
+        callback?: mqtt.PacketCallback
+    ) => Promise<void>,
     registerEvent: (
         topic: string,
         callback: (topic: string, message: string) => void,
@@ -20,15 +35,34 @@ export interface MqttHook {
     test: () => Promise<boolean>,
 }
 
+interface SubscribeOptions {
+    qos: mqtt.QoS,
+    nl: any,
+    rap: any,
+    rh: any,
+    properties: object,
+}
+
+interface PublishOptions {
+    qos: mqtt.QoS,
+    retain: any,
+    dup: any,
+    properties: object,
+}
+
 interface PublishArgs {
     topic: string,
     message: string,
     qos: mqtt.QoS,
+    opts: PublishOptions,
+    callback?: mqtt.PacketCallback,
 }
 
 interface SubscribeArgs {
     topicArray: string[],
     qos: mqtt.QoS,
+    opts: SubscribeOptions,
+    callback?: mqtt.ClientSubscribeCallback,
 }
 
 export type MqttOptions = mqtt.IClientOptions
@@ -43,32 +77,75 @@ const isConnected = () => {
     return false
 }
 
-const subscribe = async (topicArray: string[], qos: mqtt.QoS = 1) => {
+const subscribe = async (
+    topicArray: string[],
+    qos: mqtt.QoS = 1,
+    opts: SubscribeOptions = {
+        qos: 1,
+        nl: false,
+        rap: false,
+        rh: 0,
+        properties: {},
+    },
+    callback?: mqtt.ClientSubscribeCallback,
+) => {
+    opts.qos = qos
+
     if (!client?.connected) {
         subscribeBuffer.push({
             topicArray: topicArray,
             qos: qos,
+            opts: opts,
+            callback: callback,
         })
     } else {
-        client?.subscribe(topicArray, { qos })
+        client?.subscribe(
+            topicArray,
+            opts,
+            callback,
+        )
     }
 }
 
-const unSubscribe = async (unTopic: string) => {
-    client?.unsubscribe(unTopic, () => {
-        console.log(`unsubscribe: ${unTopic}`)
-    })
+const unSubscribe = async (unTopic: string, opts: Object = {}, callback?: mqtt.PacketCallback) => {
+    if (callback) {
+        client?.unsubscribe(unTopic, opts, callback)
+    } else {
+        client?.unsubscribe(unTopic, opts, () => {
+            console.log(`unsubscribe: ${unTopic}`)
+        })
+    }
 }
 
-const publish = async (topic: string, message: string, qos: mqtt.QoS = 0) => {
+const publish = async (
+    topic: string,
+    message: string,
+    qos: mqtt.QoS = 0,
+    opts: PublishOptions = {
+        qos: 0,
+        retain: false,
+        dup: false,
+        properties: {},
+    },
+    callback?: mqtt.PacketCallback,
+) => {
+    opts.qos = qos
+
     if (!client?.connected) {
         publishBuffer.push({
             topic: topic,
             message: message,
             qos: qos,
+            opts: opts,
+            callback: callback,
         })
     } else {
-        client.publish(topic, message, { qos })
+        client.publish(
+            topic,
+            message,
+            opts,
+            callback,
+        )
     }
 }
 
@@ -89,10 +166,10 @@ const onMessage = async () => {
 const onConnect = async (url: string) => {
     client?.on('connect', () => {
         console.log(`success connect to host:${url}`)
-        subscribeBuffer.forEach(({ topicArray, qos }) => subscribe(topicArray, qos))
+        subscribeBuffer.forEach(({ topicArray, qos, opts, callback }) => subscribe(topicArray, qos, opts, callback))
         subscribeBuffer.length = 0
 
-        publishBuffer.forEach(({ topic, message, qos }) => publish(topic, message, qos))
+        publishBuffer.forEach(({ topic, message, qos, opts, callback }) => publish(topic, message, qos, opts, callback))
         publishBuffer.length = 0
 
         event.runEvent('on-connect', '')
