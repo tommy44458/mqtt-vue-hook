@@ -6,7 +6,7 @@
 [![license](https://img.shields.io/npm/l/mqtt-vue-hook)](https://www.npmjs.com/package/mqtt-vue-hook)
 [![codacy](https://img.shields.io/codacy/grade/167baac7ff374d359dac9f885f566c0f)](https://www.npmjs.com/package/mqtt-vue-hook)
 
-Connect to mqtt broker using typescript, support VueJs3, Vite, ReactJs.
+This hook implemented by Typescript can connect to the MQTT broker in VueJs3, Vite, ReactJs, MQTTv5, etc.
 
 ## Example
 
@@ -74,11 +74,22 @@ import { useMQTT } from 'mqtt-vue-hook'
 
 onMounted(() => {
     const mqttHook = useMQTT()
-    // mqttHook.subscribe([...topic], qos)
-    // mqttHook.unSubscribe(topic)
+    // mqttHook.subscribe([...topic], qos, opts?, callback?)
+    // mqttHook.unSubscribe(topic, opts?, callback?)
     // '+' == /.+/
     // '#' == /[A-Za-z0-9/]/
-    mqttHook.subscribe(['+/root/#'], 1)
+    mqttHook.subscribe(
+        ['+/root/#'],
+        1,
+        {
+            properties: {
+                userProperties: {...}
+            },
+        },
+        () => {
+            console.log('subscribed!')
+        }
+    )
 })
 </script>
 ```
@@ -93,8 +104,16 @@ import { useMQTT } from 'mqtt-vue-hook'
 
 onMounted(() => {
     const mqttHook = useMQTT()
-    // mqttHook.publish(topic, message, qos)
-    mqttHook.publish(['test/root/1'], 'my message', 1)
+    // mqttHook.publish(topic, message, qos, opts, callback)
+    mqttHook.publish(
+        ['test/root/1'],
+        'my message',
+        1,
+        {},
+        () => {
+            console.log('published!')
+        }
+    )
 })
 </script>
 ```
