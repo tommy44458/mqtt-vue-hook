@@ -6,7 +6,7 @@
 [![license](https://img.shields.io/npm/l/mqtt-vue-hook)](https://www.npmjs.com/package/mqtt-vue-hook)
 [![codacy](https://img.shields.io/codacy/grade/167baac7ff374d359dac9f885f566c0f)](https://www.npmjs.com/package/mqtt-vue-hook)
 
-This hook implemented by Typescript can connect to the MQTT broker in VueJs3, Vite, ReactJs, MQTTv5, etc.
+This hook implemented by Typescript can connect to the MQTT broker (support v5) for VueJs3, Vite, ReactJs, etc.
 
 ## Example
 
