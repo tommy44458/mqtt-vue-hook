@@ -32,7 +32,6 @@ const runEvent = (topic: string, message: string) => {
                     })
                 }
             })
-            break
         }
     }
 }
