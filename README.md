@@ -8,6 +8,8 @@
 
 This hook implemented by Typescript can connect to the MQTT broker (support v5) and be used by VueJs3, Vite, ReactJs, etc.
 
+Mqtt-vue-hook is a TypeScript library that allows developers to easily connect to an MQTT broker and manage callback functions for various topics. While the library is primarily designed for use with Vue.js, it can be used in any TypeScript project. With this library, developers can handle MQTT-related logic more efficiently and effectively, making it a valuable tool for IoT applications and other scenarios that use MQTT.
+
 ## Example
 
 [A LIGHT vue3 starter support MQTT](https://github.com/tommy44458/light-vue3-starter)
