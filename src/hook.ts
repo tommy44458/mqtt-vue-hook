@@ -158,8 +158,8 @@ const onConnectFail = async () => {
 }
 
 const onMessage = async () => {
-    client?.on('message', (topic: string, message: string) => {
-        if (message) event.runEvent(topic, message)
+    client?.on('message', (topic: string, message: string, packet?: mqtt.IPublishPacket) => {
+        if (message) event.runEvent(topic, message, packet)
     })
 }
 
