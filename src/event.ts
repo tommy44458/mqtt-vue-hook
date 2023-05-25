@@ -1,8 +1,8 @@
+import mqtt from 'mqtt'
 import common from './common'
-import {IPublishPacket} from "mqtt-packet"
 
 export interface EventHook {
-    runEvent: (topic: string, message: string, packet?: IPublishPacket) => void,
+    runEvent: (topic: string, message: string, packet?: mqtt.IPublishPacket) => void,
     unRegisterEvent: (topic: string, vm?: any) => Promise<void>,
     registerEvent: (
         topic: string,
@@ -13,13 +13,13 @@ export interface EventHook {
 }
 
 export interface Listener {
-    callback: (topic: string, message: string, packet?: IPublishPacket) => void
+    callback: (topic: string, message: string, packet?: mqtt.IPublishPacket) => void
     vm: string
 }
 
 const messageListenerMap = new Map()
 
-const runEvent = (topic: string, message: string, packet?: IPublishPacket) => {
+const runEvent = (topic: string, message: string, packet?: mqtt.IPublishPacket) => {
     for (const [key, listenerList] of messageListenerMap) {
         if (common.eq(key, topic) && listenerList && listenerList.length) {
             listenerList.forEach((listener: Listener) => {
@@ -55,7 +55,10 @@ const unRegisterEvent = async (topic: string, vm = 'none') => {
     }
 }
 
-const registerEvent = async (topic: string, callback: (topic: string, message: string, packet?: IPublishPacket) => void, vm = 'none') => {
+const registerEvent = async (
+    topic: string,
+    callback: (topic: string, message: string, packet?: mqtt.IPublishPacket) => void,
+    vm = 'none') => {
     await unRegisterEvent(topic, vm)
     messageListenerMap.has(topic) || messageListenerMap.set(topic, [])
     messageListenerMap.get(topic).push({ callback, vm })
