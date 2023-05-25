@@ -16,6 +16,10 @@
       "types": "./dist/mqtt-vue-hook.d.ts"
     }
   },
+  "engines" : {
+    "npm" : ">=8.0.0",
+    "node" : ">=16.0.0"
+  },
   "repository": "https://github.com/tommy44458/mqtt-vue-hook.git",
   "author": "Tommy Xin <free44458@gmail.com>",
   "license": "MIT",
