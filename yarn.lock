@@ -1400,13 +1400,6 @@ mqtt-packet@^6.8.0:
     debug "^4.1.1"
     process-nextick-args "^2.0.1"
 
-"mqtt-vue-hook@github:1biot/mqtt-vue-hook":
-  version "1.2.19"
-  resolved "git+ssh://git@github.com/1biot/mqtt-vue-hook.git#6c681dd6e310e933adce0d818f920385321797bb"
-  dependencies:
-    "@rollup/pluginutils" "^4.2.1"
-    mqtt "^4.3.7"
-
 mqtt@^4.3.7:
   version "4.3.7"
   resolved "https://registry.npmjs.org/mqtt/-/mqtt-4.3.7.tgz"

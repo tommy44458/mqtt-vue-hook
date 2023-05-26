@@ -40,8 +40,7 @@
   },
   "dependencies": {
     "@rollup/pluginutils": "^4.2.1",
-    "mqtt": "^4.3.7",
-    "mqtt-vue-hook": "github:1biot/mqtt-vue-hook"
+    "mqtt": "^4.3.7"
   },
   "devDependencies": {
     "@types/node": "^17.0.27",
