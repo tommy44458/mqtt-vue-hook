@@ -178,14 +178,14 @@ const onConnect = async (url: string) => {
 
 const onReconnect = async () => {
     client?.on('reconnect', () => {
-        console.log('try to reconnect:', client?.options)
+        console.log('try to reconnect:', client?.options?.hostname)
         event.runEvent('on-reconnect', '')
     })
 }
 
 const onEnd = async () => {
     client?.on('end', () => {
-        console.log('disconnected:', client?.options)
+        console.log('disconnected:', client?.options?.hostname)
         event.runEvent('on-disconnect', '')
     })
 }
