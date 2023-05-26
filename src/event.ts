@@ -26,7 +26,7 @@ const runEvent = (topic: string, message: string, packet?: mqtt.IPublishPacket) 
                 try {
                     listener.callback(topic, message, packet)
                 } catch (error) {
-                    console.error({
+                    common.debug().error({
                         topic,
                         vm: listener.vm,
                         error,
