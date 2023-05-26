@@ -35,6 +35,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
+    "build:dev": "vue-tsc --noEmit && vite build -m development",
     "preview": "vite preview",
     "lint": "npx eslint . --ext .js,.ts"
   },
