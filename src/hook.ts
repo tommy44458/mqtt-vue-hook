@@ -1,227 +1,180 @@
 import mqtt from 'mqtt'
 import common from './common'
-import { eventHook } from './event'
+import { useMqttBaseHook, SubscribeOptions, PublishOptions } from './base-hook'
+import { useEventHook } from './event'
+
+const mqttBaseHook = useMqttBaseHook()
+const eventHook = useEventHook()
 
 export interface MqttHook {
-    isConnected: () => boolean
-    connect: (url: string, _options: MqttOptions) => Promise<void>,
-    disconnect: () => Promise<void>,
-    reconnect: (url: string, options: mqtt.IClientOptions) => Promise<void>,
+    isConnected: (
+        clientID?: string,
+    ) => boolean
+    connect: (
+        url: string,
+        _options: MqttOptions,
+        clientID?: string,
+    ) => Promise<void>,
+    disconnect: (
+        clientID?: string,
+    ) => Promise<void>,
+    reconnect: (
+        url: string,
+        options: mqtt.IClientOptions,
+        clientID?: string,
+    ) => Promise<void>,
     subscribe: (
         topicArray: string[],
         qos?: mqtt.QoS,
         opts?: SubscribeOptions,
-        callback?: mqtt.ClientSubscribeCallback
+        callback?: mqtt.ClientSubscribeCallback,
+        clientID?: string,
     ) => Promise<void>,
     unSubscribe: (
         unTopic: string,
         opts?: Object,
-        callback?: mqtt.PacketCallback
+        callback?: mqtt.PacketCallback,
+        clientID?: string,
     ) => Promise<void>,
     publish: (
         topic: string,
         message: string,
         qos?: mqtt.QoS,
         opts?: PublishOptions,
-        callback?: mqtt.PacketCallback
+        callback?: mqtt.PacketCallback,
+        clientID?: string,
     ) => Promise<void>,
+    showAllClient: () => Promise<string[]>,
     registerEvent: (
         topic: string,
         callback: (topic: string, message: string) => void,
-        vm?: string
+        vm?: string,
+        clientID?: string,
     ) => Promise<void>,
-    unRegisterEvent: (topic: string, vm?: any) => Promise<void>,
-    clearEvent: () => Promise<void>,
+    unRegisterEvent: (
+        topic: string,
+        vm?: any,
+        clientID?: string,
+    ) => Promise<void>,
+    clearEvent: (
+        clientID?: string,
+    ) => Promise<void>,
     test: () => Promise<boolean>,
-}
-
-interface SubscribeOptions {
-    qos: mqtt.QoS,
-    nl: any,
-    rap: any,
-    rh: any,
-    properties: object,
-}
-
-interface PublishOptions {
-    qos: mqtt.QoS,
-    retain: any,
-    dup: any,
-    properties: object,
-}
-
-interface PublishArgs {
-    topic: string,
-    message: string,
-    qos: mqtt.QoS,
-    opts: PublishOptions,
-    callback?: mqtt.PacketCallback,
-}
-
-interface SubscribeArgs {
-    topicArray: string[],
-    qos: mqtt.QoS,
-    opts: SubscribeOptions,
-    callback?: mqtt.ClientSubscribeCallback,
 }
 
 export type MqttOptions = mqtt.IClientOptions
 
-const event = eventHook()
-let client: mqtt.MqttClient | null = null
-const publishBuffer: PublishArgs[] = []
-const subscribeBuffer: SubscribeArgs[] = []
-
-const isConnected = () => {
-    if (client?.connected) return true
-    return false
+const isConnected = (clientID?: string) => {
+    if (!clientID) clientID = 'default'
+    return mqttBaseHook.isConnected(clientID)
 }
 
 const subscribe = async (
     topicArray: string[],
-    qos: mqtt.QoS = 1,
-    opts: SubscribeOptions = {
-        qos: 1,
+    qos?: mqtt.QoS,
+    opts?: SubscribeOptions,
+    callback?: mqtt.ClientSubscribeCallback,
+    clientID?: string,
+) => {
+    if (!qos) qos = 1
+    if (!opts) opts = {
+        qos: qos,
         nl: false,
         rap: false,
         rh: 0,
         properties: {},
-    },
-    callback?: mqtt.ClientSubscribeCallback,
-) => {
-    opts.qos = qos
-
-    if (!client?.connected) {
-        subscribeBuffer.push({
-            topicArray: topicArray,
-            qos: qos,
-            opts: opts,
-            callback: callback,
-        })
-    } else {
-        client?.subscribe(
-            topicArray,
-            opts,
-            callback,
-        )
     }
+    if (!callback) callback = () => { }
+    if (!clientID) clientID = 'default'
+    return mqttBaseHook.subscribe(clientID, topicArray, qos, opts, callback)
 }
 
-const unSubscribe = async (unTopic: string, opts: Object = {}, callback?: mqtt.PacketCallback) => {
-    if (callback) {
-        client?.unsubscribe(unTopic, opts, callback)
-    } else {
-        client?.unsubscribe(unTopic, opts, () => {
-            common.debug().log(`unsubscribe: ${unTopic}`)
-        })
-    }
+const unSubscribe = async (
+    unTopic: string,
+    opts?: Object,
+    callback?: mqtt.PacketCallback,
+    clientID?: string,
+) => {
+    if (!opts) opts = {}
+    if (!callback) callback = () => { }
+    if (!clientID) clientID = 'default'
+    return mqttBaseHook.unSubscribe(clientID, unTopic, opts, callback)
 }
 
 const publish = async (
     topic: string,
     message: string,
-    qos: mqtt.QoS = 0,
-    opts: PublishOptions = {
-        qos: 0,
+    qos?: mqtt.QoS,
+    opts?: PublishOptions,
+    callback?: mqtt.PacketCallback,
+    clientID?: string,
+) => {
+    if (!qos) qos = 0
+    if (!opts) opts = {
+        qos: qos,
         retain: false,
         dup: false,
         properties: {},
-    },
-    callback?: mqtt.PacketCallback,
-) => {
-    opts.qos = qos
-
-    if (!client?.connected) {
-        publishBuffer.push({
-            topic: topic,
-            message: message,
-            qos: qos,
-            opts: opts,
-            callback: callback,
-        })
-    } else {
-        client.publish(
-            topic,
-            message,
-            opts,
-            callback,
-        )
     }
+    if (!callback) callback = () => { }
+    if (!clientID) clientID = 'default'
+    return mqttBaseHook.publish(clientID, topic, message, qos, opts, callback)
 }
 
-const onConnectFail = async () => {
-    client?.on('error', (error: string) => {
-        common.debug().log('connect fail:', error)
-        client?.end()
-        event.runEvent('on-connect-fail', String(error))
-    })
+const disconnect = async (
+    clientID?: string,
+) => {
+    if (!clientID) clientID = 'default'
+    return mqttBaseHook.disconnect(clientID)
 }
 
-const onMessage = async () => {
-    client?.on('message', (topic: string, message: string, packet?: mqtt.IPublishPacket) => {
-        if (message) event.runEvent(topic, message, packet)
-    })
+export const connect = async (
+    url: string,
+    _options: MqttOptions,
+    clientID?: string,
+) => {
+    if (!clientID) clientID = 'default'
+    return mqttBaseHook.connect(clientID, url, _options)
 }
 
-const onConnect = async (url: string) => {
-    client?.on('connect', () => {
-        common.debug().log('success connect to host:', url)
-        subscribeBuffer.forEach(({ topicArray, qos, opts, callback }) => subscribe(topicArray, qos, opts, callback))
-        subscribeBuffer.length = 0
-
-        publishBuffer.forEach(({ topic, message, qos, opts, callback }) => publish(topic, message, qos, opts, callback))
-        publishBuffer.length = 0
-
-        event.runEvent('on-connect', '')
-    })
+const reconnect = async (
+    url: string,
+    _options: MqttOptions,
+    clientID?: string,
+) => {
+    if (!clientID) clientID = 'default'
+    return mqttBaseHook.reconnect(clientID, url, _options)
 }
 
-const onReconnect = async () => {
-    client?.on('reconnect', () => {
-        common.debug().log('try to reconnect:', client?.options?.hostname)
-        event.runEvent('on-reconnect', '')
-    })
+const showAllClient = async () => {
+    return mqttBaseHook.showAllClient()
 }
 
-const onEnd = async () => {
-    client?.on('end', () => {
-        common.debug().log('disconnected')
-        event.runEvent('on-disconnect', '')
-    })
+const unRegisterEvent = async (
+    topic: string,
+    vm = 'none',
+    clientID?: string,
+) => {
+    if (!clientID) clientID = 'default'
+    eventHook.unRegisterEvent(clientID, topic, vm)
 }
-
-const disconnect = async () => {
-    common.debug().log('mqtt  disconnecting')
-    client?.end()
-    client = null
-}
-
-export const connect = async (url: string, _options: MqttOptions) => {
-    common.debug().log('mqtt connecting')
-    if (client) await disconnect()
-    client = mqtt.connect(url, _options)
-    onConnect(url)
-    onMessage()
-    onReconnect()
-    onEnd()
-    onConnectFail()
-}
-
-const reconnect = async (url: string, _options: MqttOptions) => {
-    disconnect()
-    connect(url, _options)
-    common.debug().log('mqtt reconnecting')
-}
-
-const unRegisterEvent = async (topic: string, vm = 'none') => event.unRegisterEvent(topic, vm)
 
 const registerEvent = async (
     topic: string,
     callback: (topic: string, message: string) => void,
     vm = 'none',
-) => event.registerEvent(topic, callback, vm)
+    clientID?: string,
+) => {
+    if (!clientID) clientID = 'default'
+    eventHook.registerEvent(clientID, topic, callback, vm)
+}
 
-const clearEvent = async () => event.clearEvent()
+const clearEvent = async (
+    clientID?: string,
+) => {
+    if (!clientID) clientID = 'default'
+    eventHook.clearEvent(clientID)
+}
 
 const test = async () => {
     const commonTest = common.eq('+/test/#', '1/test/erw/2342')
@@ -256,6 +209,7 @@ export const mqttHook = (): MqttHook => ({
     subscribe,
     unSubscribe,
     publish,
+    showAllClient,
     registerEvent,
     unRegisterEvent,
     clearEvent,
