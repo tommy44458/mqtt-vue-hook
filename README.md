@@ -26,29 +26,7 @@ yarn add mqtt-vue-hook -D
 
 ## Usage
 
-### Vue instance
-
-```ts
-// src/main.ts
-import { createApp } from 'vue'
-import App from './App.vue'
-
-const app = createApp(App)
-
-// protocol = 'wss', 'ws', 'mqtt', ...
-// host = ip or domain
-// port = 8083, 1883, ...
-import mqttVueHook from 'mqtt-vue-hook'
-// app.use(mqttVueHook, options)
-app.use(mqttVueHook, `${protocol}://${host}:${port}`, {
-    clean: false,
-    keepalive: 60,
-    clientId: `mqtt_client_${Math.random().toString(16).substring(2, 10)}`,
-    connectTimeout: 4000,
-})
-```
-
-### React or Typescript instance
+### Vue or React or Typescript instance
 
 ```ts
 // src/app.tsx
@@ -76,8 +54,8 @@ import { useMQTT } from 'mqtt-vue-hook'
 
 onMounted(() => {
     const mqttHook = useMQTT()
-    // mqttHook.subscribe([...topic], qos, opts?, callback?)
-    // mqttHook.unSubscribe(topic, opts?, callback?)
+    // mqttHook.subscribe([...topic], qos, opts?, callback?, clientID?)
+    // mqttHook.unSubscribe(topic, opts?, callback?, clientID?)
     // '+' == /.+/
     // '#' == /[A-Za-z0-9/]/
     mqttHook.subscribe(
@@ -106,7 +84,7 @@ import { useMQTT } from 'mqtt-vue-hook'
 
 onMounted(() => {
     const mqttHook = useMQTT()
-    // mqttHook.publish(topic, message, qos, opts, callback)
+    // mqttHook.publish(topic, message, qos?, opts?, callback?, clientID?)
     mqttHook.publish(
         ['test/root/1'],
         'my message',
@@ -131,7 +109,7 @@ import { useMQTT } from 'mqtt-vue-hook'
 const mqttHook = useMQTT()
 
 onMounted(() => {
-    // mqttHook.registerEvent(topic, callback function, vm = string)
+    // mqttHook.registerEvent(topic, callback function, vm = string, clientID?)
     // mqttHook.unRegisterEvent(topic, vm)
     mqttHook.registerEvent(
         '+/root/#',
@@ -154,7 +132,7 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-    // mqttHook.unRegisterEvent(topic, vm)
+    // mqttHook.unRegisterEvent(topic, vm, clientID?))
     mqttHook.unRegisterEvent('+/root/#', 'string_key')
     mqttHook.unRegisterEvent('on-connect', 'string_key')
 })
@@ -174,3 +152,42 @@ mqttHook.publish(['test/root/1'], 'my message', 1)
 
 // console log "test/root/1 my message"
 ```
+
+### Multi-Client
+
+```ts
+import { useMQTT } from 'mqtt-vue-hook'
+const mqttHook = useMQTT()
+
+if (!mqttHook.isConnected(
+    'mqtt-client-2' // // clientID
+)) {
+    mqttHook.connect(
+        `${mqttProtocol}://${mqttHost}:${mqttPort}`,
+        {
+            clean: false,
+            keepalive: 60,
+            clientId: `mqtt_client_2_${Math.random().toString(16).substring(2, 10)}`,
+            path: '/mqtt',
+            connectTimeout: 4000,
+        },
+        'mqtt-client-2', // clientID
+    )
+
+    mqttHook.subscribe(
+        ['test/root/1'],
+        1,
+        null,
+        null,
+        'mqtt-client-2' // // clientID
+    )
+
+    mqttHook.registerEvent(
+        'test/root/1',
+        (_topic: string, message: string) => {
+            // callback
+        },
+        'string_key',
+        'mqtt-client-2', // clientID
+    )
+}
