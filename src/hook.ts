@@ -112,7 +112,7 @@ const unSubscribe = async (unTopic: string, opts: Object = {}, callback?: mqtt.P
         client?.unsubscribe(unTopic, opts, callback)
     } else {
         client?.unsubscribe(unTopic, opts, () => {
-            console.log(`unsubscribe: ${unTopic}`)
+            common.debug().log(`unsubscribe: ${unTopic}`)
         })
     }
 }
@@ -151,21 +151,21 @@ const publish = async (
 
 const onConnectFail = async () => {
     client?.on('error', (error: string) => {
-        console.log('connect fail', error)
+        common.debug().log('connect fail:', error)
         client?.end()
         event.runEvent('on-connect-fail', String(error))
     })
 }
 
 const onMessage = async () => {
-    client?.on('message', (topic: string, message: string) => {
-        if (message) event.runEvent(topic, message)
+    client?.on('message', (topic: string, message: string, packet?: mqtt.IPublishPacket) => {
+        if (message) event.runEvent(topic, message, packet)
     })
 }
 
 const onConnect = async (url: string) => {
     client?.on('connect', () => {
-        console.log(`success connect to host:${url}`)
+        common.debug().log('success connect to host:', url)
         subscribeBuffer.forEach(({ topicArray, qos, opts, callback }) => subscribe(topicArray, qos, opts, callback))
         subscribeBuffer.length = 0
 
@@ -178,26 +178,26 @@ const onConnect = async (url: string) => {
 
 const onReconnect = async () => {
     client?.on('reconnect', () => {
-        console.log('try to reconnect:', client?.options)
+        common.debug().log('try to reconnect:', client?.options?.hostname)
         event.runEvent('on-reconnect', '')
     })
 }
 
 const onEnd = async () => {
     client?.on('end', () => {
-        console.log('disconnected:', client?.options)
+        common.debug().log('disconnected')
         event.runEvent('on-disconnect', '')
     })
 }
 
 const disconnect = async () => {
-    console.log('mqtt disconnecting')
+    common.debug().log('mqtt  disconnecting')
     client?.end()
     client = null
 }
 
 export const connect = async (url: string, _options: MqttOptions) => {
-    console.log('mqtt connecting')
+    common.debug().log('mqtt connecting')
     if (client) await disconnect()
     client = mqtt.connect(url, _options)
     onConnect(url)
@@ -210,7 +210,7 @@ export const connect = async (url: string, _options: MqttOptions) => {
 const reconnect = async (url: string, _options: MqttOptions) => {
     disconnect()
     connect(url, _options)
-    console.log('mqtt reconnecting')
+    common.debug().log('mqtt reconnecting')
 }
 
 const unRegisterEvent = async (topic: string, vm = 'none') => event.unRegisterEvent(topic, vm)
@@ -236,7 +236,7 @@ const test = async () => {
 
     subscribe(['mqtt-vue-hook/test', 'mqtt-vue-hook/test2'])
     registerEvent('mqtt-vue-hook/test', (topic: string, message: string) => {
-        console.log(topic, message.toString())
+        common.debug().log(topic, message.toString())
     })
 
     unSubscribe('mqtt-vue-hook/test2')

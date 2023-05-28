@@ -18,4 +18,29 @@ const eq = (filter: string, topic: string, handleSharedSubscription: boolean = f
     return length === topicArray.length
 }
 
-export default { eq }
+const debugVoid = {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
+    log: (...data: any[]): void => {
+        return
+    },
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
+    error: (...data: any[]): void => {
+        return
+    },
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
+    warn: (...data: any[]): void => {
+        return
+    },
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
+    info: (...data: any[]): void => {
+        return
+    },
+}
+
+const debugConsole = console
+
+const debug = () => {
+    return process.env.NODE_ENV === 'production' ? debugVoid : debugConsole
+}
+
+export default { eq, debug }
