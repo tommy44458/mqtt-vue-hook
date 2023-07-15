@@ -113,7 +113,7 @@ const subscribe = async (
 ) => {
     opts.qos = qos
 
-    if (!clientObject[clientID]?.connected) {
+    if (clientObject[clientID] == null || !clientObject[clientID]?.connected) {
         const subscribeBuffer = getSubscribeBuffer(clientID)
         subscribeBuffer.push({
             topicArray: topicArray,
@@ -160,7 +160,7 @@ const publish = async (
 ) => {
     opts.qos = qos
 
-    if (!clientObject[clientID]?.connected) {
+    if (clientObject[clientID] == null || !clientObject[clientID]?.connected) {
         const publishBuffer = getPublishBuffer(clientID)
         publishBuffer.push({
             topic: topic,
