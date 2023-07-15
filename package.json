@@ -1,8 +1,8 @@
 {
   "name": "mqtt-vue-hook",
-  "version": "1.2.19",
+  "version": "1.2.20",
   "type": "module",
-  "description": "Connect to mqtt broker using typescript, support VueJs3, Vite, ReactJs.",
+  "description": "A TypeScript library that makes it easy to connect to an MQTT broker (supports v5) and manages callback functions for various topics.",
   "files": [
     "dist/*"
   ],
@@ -16,9 +16,9 @@
       "types": "./dist/mqtt-vue-hook.d.ts"
     }
   },
-  "engines" : {
-    "npm" : ">=8.0.0",
-    "node" : ">=16.0.0"
+  "engines": {
+    "npm": ">=8.0.0",
+    "node": ">=16.0.0"
   },
   "repository": "https://github.com/tommy44458/mqtt-vue-hook.git",
   "author": "Tommy Xin <free44458@gmail.com>",
